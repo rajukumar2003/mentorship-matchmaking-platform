@@ -16,7 +16,8 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // For hashed passwords if not using social auth
+  userName  String
+  password  String   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Profile   Profile?
