@@ -54,7 +54,27 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === "google") {
-        return profile?.email_verified && profile?.email?.endsWith("@gmail.com");
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: profile?.email || "" },
+          });
+
+          // If user doesn't exist, create new user
+          if (!existingUser && profile?.email) {
+            await prisma.user.create({
+              data: {
+                email: profile.email,
+                userName: profile.name || "Google User",
+                // Set a random password for Google users
+                password: await bcrypt.hash(Math.random().toString(36), 10),
+              },
+            });
+          }
+          return true;
+        } catch (error) {
+          console.error("Error saving Google user:", error);
+          return false;
+        }
       }
       return true;
     },
