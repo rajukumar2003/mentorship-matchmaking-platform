@@ -6,7 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 const prisma = new PrismaClient();
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -80,7 +80,9 @@ const authOptions: NextAuthOptions = {
     },
     
     async session({ session, token }) {
-      session.user = { id: token.id, email: token.email };
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
       return session;
     },
     async jwt({ token, user }) {
