@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import { signIn } from 'next-auth/react';
 import { Eye, EyeOff, Loader2, Mail } from 'lucide-react';
 import { emailSchema, type EmailInput } from '../../lib/validations/auth';
@@ -21,9 +21,9 @@ export default function SignupForm() {
 	const handleGoogleSignIn = async () => {
 		try {
 			setIsLoading(true);
-			await signIn('google', {
-				callbackUrl: '/home'
-			});
+			await signIn("google", {
+        callbackUrl: "/dashboard",
+      });
 		} catch (error) {
 			console.error('Google sign-in error:', error);
 			toast.error('An unexpected error occurred.');
@@ -82,7 +82,7 @@ export default function SignupForm() {
 			  if (signInResult?.error) {
 				toast.error("Error signing in after registration");
 			  } else {
-				router.push("/home");
+				router.push("/dashboard");
 			  }
 			} else {
 				const data = await res.json();
@@ -225,7 +225,6 @@ export default function SignupForm() {
 					</a>
 				</p>
 			</div>
-			<Toaster position="top-center" />
 		</div>
 	);
 }

@@ -17,10 +17,13 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   userName  String
-  password  String   
+  password  String
+  Profile   Profile?
+  notifications     Notification[]
+  sentRequests      MentorshipRequest[] @relation("SentRequests")
+  receivedRequests  MentorshipRequest[] @relation("ReceivedRequests")   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Profile   Profile?
 }
 
 model Profile {
@@ -40,4 +43,16 @@ model MentorshipRequest {
   status      String   // "pending", "accepted", "rejected"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  sender      User     @relation("SentRequests", fields: [senderId], references: [id])
+  receiver    User     @relation("ReceivedRequests", fields: [receiverId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // 'request' | 'update'
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id])
 }

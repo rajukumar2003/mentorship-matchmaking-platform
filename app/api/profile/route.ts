@@ -49,3 +49,30 @@ export async function POST(req: Request) {
     await prisma.$disconnect();
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    return NextResponse.json({ profile });
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
+}

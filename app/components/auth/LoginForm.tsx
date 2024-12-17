@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function LoginForm() {
@@ -17,7 +17,7 @@ export default function LoginForm() {
         try {
             setIsLoading(true);
             await signIn('google', {
-                callbackUrl: '/home'
+                callbackUrl: '/dashboard'
             });
         } catch (error) {
             console.error('Google sign-in error:', error);
@@ -41,7 +41,7 @@ export default function LoginForm() {
         toast.error(result.error);
       } else {
         toast.success('Login successful 🎉');
-        router.push('/home');
+        router.push("/dashboard");
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -146,7 +146,6 @@ export default function LoginForm() {
           </a>
         </p>
       </div>
-      <Toaster position="top-center" />
     </div>
   );
 }

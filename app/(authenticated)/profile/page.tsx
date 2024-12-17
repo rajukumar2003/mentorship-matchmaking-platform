@@ -28,7 +28,7 @@ export default function ProfileSetup() {
 
       if (response.ok) {
         toast.success("Profile updated successfully!");
-        router.push("/home");
+        router.push("/dashboard");
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to update profile");
