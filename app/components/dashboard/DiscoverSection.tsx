@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
@@ -14,24 +14,17 @@ interface User {
 }
 
 export function DiscoverSection() {
-  const [recentUsers, setRecentUsers] = useState<User[]>([]);
-  const router = useRouter();
-
-  useEffect(() => {
-    fetchRecentUsers();
-  }, []);
-
-  const fetchRecentUsers = async () => {
-    try {
+  const { data: users, isLoading } = useQuery({
+    queryKey: ['discover', 'recent'],
+    queryFn: async () => {
       const response = await fetch('/api/users/discover');
+      if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
-      if (response.ok) {
-        setRecentUsers(data.users.slice(0, 3));
-      }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    }
-  };
+      return data.users.slice(0, 3);
+    },
+  });
+
+  const router = useRouter();
 
   const handleUserClick = (user: User) => {
     router.push(`/discover?role=${user.role}`);
@@ -50,7 +43,7 @@ export function DiscoverSection() {
       </div>
 
       <div className="grid gap-4">
-        {recentUsers.map((user) => (
+        {users?.map((user) => (
           <div 
             key={user.id} 
             onClick={() => handleUserClick(user)}

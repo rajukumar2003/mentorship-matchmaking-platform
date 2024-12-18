@@ -26,7 +26,7 @@ function DashboardContent() {
         </div>
 
         <div className="lg:col-span-6 space-y-6">
-          <WelcomeBanner userName={session?.user?.userName} />
+          <WelcomeBanner userName={session?.user?.userName || session?.user?.name} />
           <RecommendedMatches />
           <DiscoverSection />
         </div>

@@ -1,44 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 
-interface MatchedUser {
-  userId: string;
-  userName: string;
-  email: string;
-  score: number;
-  matchedSkills: string[];
-}
 
 export function RecommendedMatches() {
-  const [matches, setMatches] = useState<MatchedUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    fetchMatches();
-  }, []);
-
-  const fetchMatches = async () => {
-    try {
+  const { data: matches, isLoading } = useQuery({
+    queryKey: ['matches'],
+    queryFn: async () => {
       const response = await fetch('/api/users/matches');
-      const data = await response.json();
-      
-      if (response.ok) {
-        setMatches(data.matches);
-      } else {
-        toast.error('Failed to fetch recommendations');
-      }
-    } catch (error) {
-      console.error('Error fetching matches:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      if (!response.ok) throw new Error('Failed to fetch matches');
+      return response.json();
+    },
+  });
+
+  const router = useRouter();
 
   const handleMatchClick = (userName: string) => {
     router.push(`/discover?search=${encodeURIComponent(userName)}`);
@@ -64,13 +42,13 @@ export function RecommendedMatches() {
       </div>
 
       <div className="space-y-4">
-        {matches.length === 0 ? (
+        {matches.matches.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
             <p className="text-gray-500">No recommendations available yet</p>
             <p className="text-sm text-gray-400 mt-1">Complete your profile to get matched</p>
           </div>
         ) : (
-          matches.slice(0, 3).map((match, index) => (
+          matches.matches.slice(0, 3).map((match, index) => (
             <motion.div
               key={match.userId}
               initial={{ opacity: 0, y: 20 }}
