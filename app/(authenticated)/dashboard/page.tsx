@@ -17,7 +17,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-6 space-y-6">
-          <WelcomeBanner userName={session?.user?.email} />
+          <WelcomeBanner userName={session?.user?.userName} />
           <DiscoverSection />
         </div>
 

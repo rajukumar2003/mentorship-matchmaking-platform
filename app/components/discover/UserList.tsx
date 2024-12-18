@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 interface User {
@@ -21,25 +21,64 @@ interface UserListProps {
 
 export function UserList({ users, isLoading }: UserListProps) {
   const [requestLoading, setRequestLoading] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchExistingRequests();
+  }, []);
+
+  const fetchExistingRequests = async () => {
+    try {
+      const response = await fetch('/api/mentorship/request');
+      const data = await response.json();
+      
+      // Create a map of userId to request status
+      const statusMap: Record<string, string> = {};
+      [...data.sentRequests, ...data.receivedRequests].forEach((req: any) => {
+        statusMap[req.receiverId] = req.status;
+        statusMap[req.senderId] = req.status;
+      });
+      
+      setConnectionStatus(statusMap);
+    } catch (error) {
+      console.error('Failed to fetch requests:', error);
+    }
+  };
+
+  const getButtonText = (userId: string) => {
+    const status = connectionStatus[userId];
+    if (status === 'pending') return 'Request Pending';
+    if (status === 'accepted') return 'Connected';
+    if (status === 'rejected') return 'Connect';
+    return 'Connect';
+  };
 
   const handleConnect = async (userId: string) => {
+    setRequestLoading(userId);
     
-      setRequestLoading(userId);
     try {
-      const response = await fetch('/api/mentorship/request', {
+      const promise = fetch('/api/mentorship/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ receiverId: userId }),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        toast.success('Connection request sent!');
-      } else {
-        toast.error(data.message || 'Failed to send request');
+      toast.promise(promise, {
+        loading: 'Sending...',
+        success: 'Connection request sent!',
+        error: 'Failed to send request',
+      });
+
+      const response = await promise;
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send request');
       }
+
     } catch (error) {
-      toast.error('Something went wrong');
+        toast.error('Something went wrong, try again!');
+        console.error("Failed to connect, try again!",error)
     } finally {
       setRequestLoading(null);
     }
@@ -76,10 +115,10 @@ export function UserList({ users, isLoading }: UserListProps) {
 
           <button
             onClick={() => handleConnect(user.userId)}
-            disabled={requestLoading === user.id}
+            disabled={requestLoading === user.id || connectionStatus[user.userId] === 'accepted' || connectionStatus[user.userId] === 'pending'}
             className="mt-4 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            {requestLoading === user.id ? 'Sending...' : 'Connect'}
+            {requestLoading === user.id ? 'Sending...' : getButtonText(user.userId)}
           </button>
         </div>
       ))}

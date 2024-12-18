@@ -19,26 +19,47 @@ export async function GET(req: Request) {
     const role = searchParams.get('role');
     const skills = searchParams.get('skills')?.split(',').filter(Boolean);
     const interests = searchParams.get('interests')?.split(',').filter(Boolean);
+    const searchTerm = searchParams.get('search')?.trim();
 
     // Build the query filters
-    const where = {
+    const where: any = {
       NOT: {
         userId: session.user.id
-      },
-      ...(role && { role }),
-      ...(skills?.length && {
-        skills: {
-          contains: skills.join(','),
-          mode: 'insensitive'
-        }
-      }),
-      ...(interests?.length && {
-        interests: {
-          contains: interests.join(','),
-          mode: 'insensitive'
-        }
-      })
+      }
     };
+
+    // Add role filter if specified
+    if (role) {
+      where.role = role;
+    }
+
+    // Add skills filter if specified
+    if (skills?.length) {
+      where.skills = {
+        contains: skills.join(','),
+        mode: 'insensitive'
+      };
+    }
+
+    // Add search filter if specified
+    if (searchTerm) {
+      where.OR = [
+        {
+          User: {
+            userName: {
+              contains: searchTerm,
+              mode: 'insensitive'
+            }
+          }
+        },
+        {
+          skills: {
+            contains: searchTerm,
+            mode: 'insensitive'
+          }
+        }
+      ];
+    }
 
     const profiles = await prisma.profile.findMany({
       where,

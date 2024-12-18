@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials.");
         }
 
-        return { id: user.id, email: user.email };
+        return { id: user.id, email: user.email, userName: user.userName };
       },
     }),
     GoogleProvider({
@@ -82,6 +82,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.userName = token.userName;
       }
       return session;
     },
@@ -89,6 +90,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.userName = user.userName;
       }
       return token;
     },

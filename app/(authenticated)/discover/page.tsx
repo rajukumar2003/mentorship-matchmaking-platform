@@ -13,7 +13,8 @@ export default function DiscoverPage() {
   const [filters, setFilters] = useState({
     role: '',
     skills: [],
-    interests: []
+    interests: [],
+    search: ''
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,12 +27,13 @@ export default function DiscoverPage() {
       const queryParams = new URLSearchParams({
         role: filters.role,
         skills: filters.skills.join(','),
-        interests: filters.interests.join(',')
+        interests: filters.interests.join(','),
+        search: filters.search || ''
       });
 
       const response = await fetch(`/api/users/discover?${queryParams}`);
-        const data = await response.json();
-        console.log('data------------', data.users)
+      const data = await response.json();
+      
       if (response.ok) {
         setUsers(data.users);
       } else {
