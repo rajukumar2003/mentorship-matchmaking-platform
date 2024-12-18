@@ -1,40 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Settings } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-
-interface Profile {
-  role: string;
-  skills: string;
-  bio: string;
-}
+import { useProfile } from '@/providers/ProfileContext';
 
 export function ProfileOverview() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { profile, isLoading } = useProfile();
   const router = useRouter();
   const { data: session } = useSession();
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/profile');
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data.profile);
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (

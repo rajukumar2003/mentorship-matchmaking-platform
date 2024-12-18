@@ -90,6 +90,12 @@ export const authOptions: NextAuthOptions = {
         // Using the database ID instead of Google's ID
         session.user.id = token.dbUserId || token.id as string;
         session.user.userName = token.userName;
+        
+        // Check profile completion
+        const profile = await prisma.profile.findUnique({
+          where: { userId: session.user.id }
+        });
+        session.user.hasProfile = !!profile;
       }
       return session;
     },
