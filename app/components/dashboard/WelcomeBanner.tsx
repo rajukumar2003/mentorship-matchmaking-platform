@@ -21,7 +21,7 @@ export function WelcomeBanner({ userName }: { userName?: string }) {
       <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
       <div className="relative">
         <h1 className="text-2xl font-bold">
-          Welcome back, {userName || 'there'}! ✨
+          Welcome, {userName || 'there'}! ✨
         </h1>
         <p className="text-lg text-white/90 mt-2 font-medium">
           {randomGreeting}

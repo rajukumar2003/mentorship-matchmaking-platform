@@ -69,15 +69,15 @@ export function UserList({ users, isLoading }: UserListProps) {
         error: 'Failed to send request',
       });
 
-      const response = await promise;
+        const response = await promise;
 
       if (!response.ok) {
-        const errorData = await response.json();
+          const errorData = await response.json();
+          toast.error(`${errorData.message}`)
         throw new Error(errorData.message || 'Failed to send request');
       }
 
     } catch (error) {
-        toast.error('Something went wrong, try again!');
         console.error("Failed to connect, try again!",error)
     } finally {
       setRequestLoading(null);

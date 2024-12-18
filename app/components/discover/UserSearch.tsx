@@ -1,14 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
 interface UserSearchProps {
+  initialSearch: string;
   setFilters: (filters: any) => void;
 }
 
-export function UserSearch({ setFilters }: UserSearchProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function UserSearch({ initialSearch, setFilters }: UserSearchProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+
+  useEffect(() => {
+    setSearchTerm(initialSearch);
+    handleSearch(initialSearch);
+  }, [initialSearch]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);

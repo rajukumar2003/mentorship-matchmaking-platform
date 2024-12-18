@@ -5,6 +5,7 @@ import { WelcomeBanner } from '@/components/dashboard/WelcomeBanner';
 import { RequestsOverview } from '@/components/dashboard/RequestsOverview';
 import { DiscoverSection } from '@/components/dashboard/DiscoverSection';
 import { ProfileOverview } from '@/components/dashboard/ProfileOverview';
+import { RecommendedMatches } from '@/components/dashboard/RecommendedMatches';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -18,6 +19,7 @@ export default function DashboardPage() {
 
         <div className="lg:col-span-6 space-y-6">
           <WelcomeBanner userName={session?.user?.userName} />
+          <RecommendedMatches />
           <DiscoverSection />
         </div>
 

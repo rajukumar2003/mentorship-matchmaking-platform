@@ -55,13 +55,13 @@ export const authOptions: NextAuthOptions = {
     async signIn({ account, profile }) {
       if (account?.provider === "google") {
         try {
-          const existingUser = await prisma.user.findUnique({
+          let dbUser = await prisma.user.findUnique({
             where: { email: profile?.email || "" },
           });
 
           // If user doesn't exist, create new user
-          if (!existingUser && profile?.email) {
-            await prisma.user.create({
+          if (!dbUser && profile?.email) {
+            dbUser = await prisma.user.create({
               data: {
                 email: profile.email,
                 userName: profile.name || "Google User",
@@ -70,6 +70,12 @@ export const authOptions: NextAuthOptions = {
               },
             });
           }
+
+          // Attach the database user ID to the profile
+          if (dbUser) {
+            profile.dbUserId = dbUser.id;
+          }
+
           return true;
         } catch (error) {
           console.error("Error saving Google user:", error);
@@ -81,12 +87,17 @@ export const authOptions: NextAuthOptions = {
     
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
+        // Using the database ID instead of Google's ID
+        session.user.id = token.dbUserId || token.id as string;
         session.user.userName = token.userName;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, profile }) {
+      if (profile) {
+        // Store the database user ID in the token
+        token.dbUserId = profile.dbUserId;
+      }
       if (user) {
         token.id = user.id;
         token.email = user.email;

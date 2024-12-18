@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { UserSearch } from '../../components/discover/UserSearch'
 import { UserList } from '../../components/discover/UserList';
 import { Filters } from '../../components/discover/Filters';
@@ -9,12 +10,13 @@ import { toast } from 'sonner';
 
 export default function DiscoverPage() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState([]);
   const [filters, setFilters] = useState({
     role: '',
     skills: [],
     interests: [],
-    search: ''
+    search: searchParams.get('search') || ''
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,7 +56,7 @@ export default function DiscoverPage() {
           <Filters filters={filters} setFilters={setFilters} />
         </div>
         <div className="md:col-span-3">
-          <UserSearch setFilters={setFilters} />
+          <UserSearch initialSearch={filters.search} setFilters={setFilters} />
           <UserList users={users} isLoading={isLoading} />
         </div>
       </div>

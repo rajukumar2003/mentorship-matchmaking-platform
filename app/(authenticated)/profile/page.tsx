@@ -1,21 +1,45 @@
 'use client'
 
-import { useState } from "react";
-import { toast, Toaster } from "sonner";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { toast, Toaster } from 'sonner';
 
 export default function ProfileSetup() {
-    const [role, setRole] = useState("mentor");
-    const [skills, setSkills] = useState("");
-    const [bio, setBio] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
-    const { data: session, status } = useSession();
-    
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsLoading(true);
+  const [role, setRole] = useState("mentor");
+  const [skills, setSkills] = useState("");
+  const [bio, setBio] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('/api/profile');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.profile) {
+          setRole(data.profile.role);
+          setSkills(data.profile.skills);
+          setBio(data.profile.bio);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      toast.error('Failed to load profile data');
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/profile", {
@@ -40,6 +64,24 @@ export default function ProfileSetup() {
       setIsLoading(false);
     }
   };
+
+  if (isFetching) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-pulse space-y-4 bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+          <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-24 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
