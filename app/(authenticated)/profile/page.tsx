@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { toast, Toaster } from 'sonner';
 
 export default function ProfileSetup() {
@@ -12,7 +11,6 @@ export default function ProfileSetup() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const router = useRouter();
-  const { data: session, status } = useSession();
 
   useEffect(() => {
     fetchProfile();

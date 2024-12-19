@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { UserSearch } from '../../components/discover/UserSearch'
 import { UserList } from '../../components/discover/UserList';
@@ -9,7 +8,6 @@ import { Filters } from '../../components/discover/Filters';
 import { toast } from 'sonner';
 
 export default function DiscoverPage() {
-  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [users, setUsers] = useState([]);
   const [filters, setFilters] = useState({
@@ -20,18 +18,15 @@ export default function DiscoverPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [filters]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
     try {
       const queryParams = new URLSearchParams({
         role: filters.role,
         skills: filters.skills.join(','),
         interests: filters.interests.join(','),
-        search: filters.search || ''
-      });
+        search: filters.search
+      }).toString();
 
       const response = await fetch(`/api/users/discover?${queryParams}`);
       const data = await response.json();
@@ -42,11 +37,16 @@ export default function DiscoverPage() {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error('Failed to fetch users');
+      toast.error(`Failed to fetch users, ${error}`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
+
+
+  useEffect(() => {
+    fetchUsers();
+  }, [filters, fetchUsers]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -62,4 +62,4 @@ export default function DiscoverPage() {
       </div>
     </div>
   );
-} 
+}

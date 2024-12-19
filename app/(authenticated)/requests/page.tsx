@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { RequestList } from '../../components/requests/RequestList';
 import { toast } from 'sonner';
 
 export default function RequestsPage() {
-  const { data: session } = useSession();
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +25,7 @@ export default function RequestsPage() {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error('Failed to fetch requests');
+      toast.error(`Failed to fetch requests ${error}`);
     } finally {
       setIsLoading(false);
     }

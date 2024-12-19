@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+interface FilterState {
+  role: string;
+  skills: string[];
+  interests: string[];
+  search: string;
+}
 
 interface FiltersProps {
-  filters: {
-    role: string;
-    skills: string[];
-    interests: string[];
-  };
-  setFilters: (filters: any) => void;
+  filters: FilterState;
+  setFilters: (filters: FilterState) => void;
 }
 
 export function Filters({ filters, setFilters }: FiltersProps) {

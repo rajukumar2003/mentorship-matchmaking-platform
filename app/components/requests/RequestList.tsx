@@ -45,7 +45,7 @@ export function RequestList({ requests, type, isLoading, onStatusUpdate }: Reque
         toast.error(data.message || 'Failed to update request');
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error(`Something went wrong ${error}`);
     } finally {
       setUpdatingId(null);
     }

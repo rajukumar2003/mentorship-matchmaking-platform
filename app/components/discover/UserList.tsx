@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface User {
+  userId: string;
   id: string;
   User: {
     userName: string;
@@ -22,6 +24,7 @@ interface UserListProps {
 export function UserList({ users, isLoading }: UserListProps) {
   const [requestLoading, setRequestLoading] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<Record<string, string>>({});
+  const router = useRouter();
 
   useEffect(() => {
     fetchExistingRequests();
@@ -34,7 +37,7 @@ export function UserList({ users, isLoading }: UserListProps) {
       
       // Create a map of userId to request status
       const statusMap: Record<string, string> = {};
-      [...data.sentRequests, ...data.receivedRequests].forEach((req: any) => {
+      [...data.sentRequests, ...data.receivedRequests].forEach((req) => {
         statusMap[req.receiverId] = req.status;
         statusMap[req.senderId] = req.status;
       });
@@ -69,14 +72,14 @@ export function UserList({ users, isLoading }: UserListProps) {
         error: 'Failed to send request',
       });
 
-        const response = await promise;
+      const response = await promise;
 
       if (!response.ok) {
           const errorData = await response.json();
           toast.error(`${errorData.message}`)
-        throw new Error(errorData.message || 'Failed to send request');
       }
-
+      router.push('/requests')
+      
     } catch (error) {
         console.error("Failed to connect, try again!",error)
     } finally {

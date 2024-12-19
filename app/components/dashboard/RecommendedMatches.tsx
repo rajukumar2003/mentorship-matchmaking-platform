@@ -42,13 +42,13 @@ export function RecommendedMatches() {
       </div>
 
       <div className="space-y-4">
-        {matches.matches.length === 0 ? (
+        {matches?.matches.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
             <p className="text-gray-500">No recommendations available yet</p>
             <p className="text-sm text-gray-400 mt-1">Complete your profile to get matched</p>
           </div>
         ) : (
-          matches.matches.slice(0, 3).map((match, index) => (
+          matches?.matches.slice(0, 3).map((match, index) => (
             <motion.div
               key={match.userId}
               initial={{ opacity: 0, y: 20 }}

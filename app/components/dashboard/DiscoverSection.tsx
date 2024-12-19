@@ -14,7 +14,7 @@ interface User {
 }
 
 export function DiscoverSection() {
-  const { data: users, isLoading } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ['discover', 'recent'],
     queryFn: async () => {
       const response = await fetch('/api/users/discover');
@@ -27,7 +27,7 @@ export function DiscoverSection() {
   const router = useRouter();
 
   const handleUserClick = (user: User) => {
-    router.push(`/discover?role=${user.role}`);
+    router.push(`/discover?search=${encodeURIComponent(user.User.userName)}`);
   };
 
   return (

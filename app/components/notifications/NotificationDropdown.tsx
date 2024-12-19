@@ -18,32 +18,36 @@ export function NotificationDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
   useEffect(() => {
+    let isSubscribed = true;
     
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 40000);
-    return () => clearInterval(interval);
-  }, [session?.user?.id]);
-
-  const fetchNotifications = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/notifications');
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
+    const fetchAndSetNotifications = async () => {
+      try {
+        const response = await fetch('/api/notifications');
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications');
+        }
+        const data = await response.json();
+        if (isSubscribed) {
+          setNotifications(data.notifications);
+          setUnreadCount(data.notifications.filter((n: Notification) => !n.isRead).length);
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
       }
-      const data = await response.json();
-      setNotifications(data.notifications);
-      setUnreadCount(data.notifications.filter((n: Notification) => !n.isRead).length);
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    fetchAndSetNotifications();
+    const interval = setInterval(fetchAndSetNotifications, 40000);
+    
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const markAsRead = async (id: string) => {
     try {

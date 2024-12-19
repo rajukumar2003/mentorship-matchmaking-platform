@@ -17,7 +17,7 @@ function DashboardContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {!profile && (
-        <ProfileCompletionBanner userName={session?.user?.userName || ''} />
+        <ProfileCompletionBanner userName={session?.user?.name || ''} />
       )}
       
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -26,7 +26,7 @@ function DashboardContent() {
         </div>
 
         <div className="lg:col-span-6 space-y-6">
-          <WelcomeBanner userName={session?.user?.userName || session?.user?.name} />
+          <WelcomeBanner userName={ session?.user?.name || ''} />
           <RecommendedMatches />
           <DiscoverSection />
         </div>

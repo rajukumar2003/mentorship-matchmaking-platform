@@ -1,16 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
+    // Ensure the user is authenticated
     if (!session?.user?.id) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -18,20 +17,30 @@ export async function PATCH(
       );
     }
 
-    const { status } = await req.json();
-    const validStatuses = ['accepted', 'rejected', 'pending'] as const;
-    type RequestStatus = typeof validStatuses[number];
+    // Extract the ID from the request URL
+    const id = req.nextUrl.pathname.split("/").pop();
+    if (!id) {
+      return NextResponse.json(
+        { message: "Invalid request: Missing ID" },
+        { status: 400 }
+      );
+    }
 
-    if (!validStatuses.includes(status as RequestStatus)) {
+    // Parse the request body
+    const { status } = await req.json();
+    const validStatuses = ["accepted", "rejected", "pending"] as const;
+
+    if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { message: "Invalid status" },
         { status: 400 }
       );
     }
 
+    // Find the mentorship request
     const request = await prisma.mentorshipRequest.findUnique({
-      where: { id: params.id },
-      include: { sender: true }
+      where: { id },
+      include: { sender: true },
     });
 
     if (!request) {
@@ -41,6 +50,7 @@ export async function PATCH(
       );
     }
 
+    // Verify that the logged-in user is the receiver
     if (request.receiverId !== session.user.id) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -48,23 +58,26 @@ export async function PATCH(
       );
     }
 
-    // Update request status
+    // Update the request status
     const updatedRequest = await prisma.mentorshipRequest.update({
-      where: { id: params.id },
-      data: { status }
+      where: { id },
+      data: { status },
     });
 
-    // Create notification for the sender
+    // Create a notification for the sender
     await prisma.notification.create({
       data: {
         userId: request.senderId,
-        type: 'request',
+        type: "request",
         message: `Your mentorship request has been ${status} by ${session.user.email}`,
-        isRead: false
-      }
+        isRead: false,
+      },
     });
 
-    return NextResponse.json({ message: `Request ${status}`, request: updatedRequest });
+    return NextResponse.json({
+      message: `Request ${status}`,
+      request: updatedRequest,
+    });
   } catch (error) {
     console.error("Request status update error:", error);
     return NextResponse.json(
@@ -74,4 +87,4 @@ export async function PATCH(
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

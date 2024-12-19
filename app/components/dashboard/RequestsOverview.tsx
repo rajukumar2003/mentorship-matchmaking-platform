@@ -56,7 +56,7 @@ export function RequestsOverview() {
         toast.error(data.message || 'Failed to update request');
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      console.error(error);
     }
   };
 
